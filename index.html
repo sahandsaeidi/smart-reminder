@@ -543,9 +543,10 @@
             }
 
             try {
-                const registration = await navigator.serviceWorker.register('sw.js', {
-                    scope: '/'
-                });
+                // sw
+await navigator.serviceWorker.register('/smart-reminder/sw.js', {
+    scope: '/smart-reminder/'
+});
                 console.log('✅ Service Worker registered:', registration);
 
                 if (registration.pushManager) {
