@@ -15,12 +15,6 @@ You can install it on your phone like a native app!
 - 💾 Auto-save in browser (localStorage)
 - 📋 List of active reminders
 
----
-
-## 🚀 Live Demo
-
-- [Persian Version](https://sahandsaeidi.github.io/smart-reminder/fa.html)
-- [English Version](https://sahandsaeidi.github.io/smart-reminder/en.html)
 
 ---
 
