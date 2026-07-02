@@ -52,14 +52,11 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request)
             .then((cachedResponse) => {
-                // اگر در کش وجود داشت، برگردون
                 if (cachedResponse) {
                     return cachedResponse;
                 }
-                // در غیر این صورت از شبکه درخواست کن
                 return fetch(event.request)
                     .then((response) => {
-                        // اگر پاسخ معتبر بود، در کش ذخیره کن
                         if (response && response.status === 200) {
                             const responseClone = response.clone();
                             caches.open(CACHE_NAME)
@@ -70,7 +67,6 @@ self.addEventListener('fetch', (event) => {
                         return response;
                     })
                     .catch(() => {
-                        // اگر آفلاین بود، صفحه خطا برگردون
                         return new Response('آفلاین هستید!', {
                             status: 503,
                             statusText: 'Service Unavailable'
@@ -105,12 +101,10 @@ self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
     if (event.action === 'open') {
-        // باز کردن برنامه
         event.waitUntil(
             clients.openWindow('/')
         );
     } else {
-        // کلیک معمولی
         event.waitUntil(
             clients.matchAll({ type: 'window', includeUncontrolled: true })
                 .then((clientList) => {
