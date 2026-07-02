@@ -536,30 +536,23 @@
         // ======================================================
         // Service Worker
         // ======================================================
-        async function registerServiceWorker() {
-            if (!('serviceWorker' in navigator)) {
-                console.log('Service Worker not supported');
-                return;
-            }
+       async function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) {
+        showToast('⚠️your browser for service worker not allowed!');
+        return;
+    }
 
-            try {
-                // sw
-await navigator.serviceWorker.register('/smart-reminder/sw.js', {
-    scope: '/smart-reminder/'
-});
-                console.log('✅ Service Worker registered:', registration);
-
-                if (registration.pushManager) {
-                    console.log('✅ Push Manager supported');
-                }
-
-                showToast('✅ Service Worker activated!');
-
-            } catch (error) {
-                console.error('❌ Service Worker registration failed:', error);
-                showToast('⚠️ Service Worker registration failed!');
-            }
-        }
+    try {
+        const registration = await navigator.serviceWorker.register('sw.js', {
+            scope: '/smart-reminder/'
+        });
+        console.log('✅ service worker enable:', registration);
+        showToast('✅ service worker enabled!');
+    } catch (error) {
+        console.error('❌ error:', error);
+        showToast('⚠️service worker not working!!');
+    }
+}
 
         // ======================================================
         // PWA Install
