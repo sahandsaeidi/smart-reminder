@@ -6,7 +6,6 @@ const CACHE_NAME = 'reminder-cache-v1';
 const ASSETS = [
     '/',
     '/index.html',
-    '/fa.html',
     '/manifest.json',
     '/favicon-32x32.png',
     '/favicon-16x16.png',
