@@ -347,40 +347,35 @@
 
         // ======================================================
         // Send Notification
-        // ======================================================
-        function sendNotification(title, body) {
-            if (!notificationPermission) {
-                console.log('No notification permission');
-                return;
-            }
+      function sendNotification(title, body) {
+    if (!("Notification" in window)) {
+        showToast("❌ Your browser does not support notifications!");
+        return;
+    }
 
-            try {
-                const options = {
-                    body: body,
-                    icon: 'icon.png',
-                    badge: 'icon.png',
-                    vibrate: [200, 100, 200],
-                    requireInteraction: true,
-                    tag: Date.now().toString(),
-                    actions: [
-                        { action: 'open', title: '📂 Open' }
-                    ]
-                };
-
-                const notification = new Notification(title, options);
-
-                notification.onclick = function() {
-                    window.focus();
-                    this.close();
-                };
-
-                playNotificationSound();
-
-            } catch (e) {
-                console.error('Notification error:', e);
-            }
+    if (Notification.permission === "granted") {
+        try {
+            const options = {
+                body: body,
+                icon: "/smart-reminder/favicon-32x32.png",
+                vibrate: [200, 100, 200],
+                requireInteraction: true
+            };
+            const notification = new Notification(title, options);
+            notification.onclick = function() {
+                window.focus();
+                this.close();
+            };
+            playNotificationSound();
+            showToast(`🔔 Notification "${title}" sent!`);
+        } catch (e) {
+            console.error("❌ Error sending notification:", e);
+            showToast("❌ Error sending notification!");
         }
-
+    } else {
+        showToast("⚠️ Notification permission not granted!");
+    }
+}
         // ======================================================
         // Sound
         // ======================================================
@@ -538,7 +533,7 @@
         // ======================================================
        async function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) {
-        showToast('⚠️your browser for service worker not allowed!');
+        showToast('⚠️Your browser does not support service worker!');
         return;
     }
 
