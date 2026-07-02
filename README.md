@@ -50,7 +50,7 @@ text
 
 ## 👨‍💻 Developer
 
-**S3H4ND**  
+**Sahand Saeidi**  
 [GitHub](https://github.com/sahandsaeidi)
 
 ---
