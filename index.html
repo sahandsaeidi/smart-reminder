@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Reminder - S3H4ND</title>
+    
+    <!-- ====== PWA ====== -->
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <style>
+        /* ===== RESET ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        header h1 {
+            color: #4a3f5c;
+            font-size: 2.2rem;
+        }
+
+        header p {
+            color: #7c6b9e;
+            font-size: 1rem;
+        }
+
+        .add-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .add-section h2 {
+            color: white;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-group input,
+        .input-group select {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .input-group button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            background: #4a3f5c;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .input-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .reminder-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .reminder-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f6ff;
+            padding: 15px 18px;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .reminder-item:hover {
+            background: #f0ebf7;
+        }
+
+        .reminder-info {
+            flex: 1;
+        }
+
+        .reminder-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #4a3f5c;
+        }
+
+        .reminder-time {
+            font-size: 0.9rem;
+            color: #7c6b9e;
+        }
+
+        .reminder-status {
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: #42e695;
+            color: white;
+        }
+
+        .reminder-status.pending {
+            background: #f5576c;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #f5576c;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-delete:hover {
+            background: #ffe8ec;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #a99bbc;
+            padding: 40px 20px;
+        }
+
+        .install-btn {
+            background: #42e695;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .install-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4a3f5c;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+            font-weight: bold;
+        }
+
+        .toast.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .input-group {
+                flex-direction: column;
+            }
+        }
+
+        .lang-switch {
+            margin-top: 10px;
+            display: inline-block;
+            background: #4a3f5c;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .lang-switch:hover {
+            background: #5f4f7a;
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>⏰ Smart Reminder</h1>
+            <p>With Notifications + Service Worker + PWA</p>
+            <a href="fa.html" class="lang-switch">🇮🇷 فارسی</a>
+            <button class="install-btn" id="installBtn">📲 Install App</button>
+        </header>
+
+        <!-- Add Reminder -->
+        <div class="add-section">
+            <h2>➕ New Reminder</h2>
+            <div class="input-group">
+                <input type="text" id="reminderTitle" placeholder="Title (e.g. Meeting)">
+                <input type="datetime-local" id="reminderTime">
+                <button id="addReminderBtn">➕ Add</button>
+            </div>
+        </div>
+
+        <!-- Reminder List -->
+        <h3>📋 Active Reminders</h3>
+        <div class="reminder-list" id="reminderList">
+            <!-- Filled by JS -->
+        </div>
+    </div>
+
+    <!-- Toast Message -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ======================================================
+        // Data & Variables
+        // ======================================================
+        let reminders = [];
+        let notificationPermission = false;
+        let checkInterval = null;
+
+        // ======================================================
+        // Load from localStorage
+        // ======================================================
+        function loadData() {
+            const saved = localStorage.getItem('remindersData');
+            if (saved) {
+                try {
+                    reminders = JSON.parse(saved);
+                    reminders = reminders.map(r => ({
+                        ...r,
+                        time: new Date(r.time)
+                    }));
+                } catch (e) {
+                    reminders = [];
+                }
+            } else {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() + 2);
+                reminders = [{
+                    id: Date.now(),
+                    title: 'Test Reminder',
+                    time: now,
+                    notified: false
+                }];
+            }
+            saveData();
+            renderReminders();
+        }
+
+        function saveData() {
+            localStorage.setItem('remindersData', JSON.stringify(reminders));
+        }
+
+        // ======================================================
+        // Toast
+        // ======================================================
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // ======================================================
+        // Notification Permission
+        // ======================================================
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                showToast('❌ Your browser does not support notifications!');
+                return false;
+            }
+
+            if (Notification.permission === 'granted') {
+                notificationPermission = true;
+                return true;
+            }
+
+            if (Notification.permission === 'denied') {
+                showToast('⚠️ Notification permission denied. Please enable it in browser settings.');
+                return false;
+            }
+
+            const permission = await Notification.requestPermission();
+            notificationPermission = permission === 'granted';
+            if (notificationPermission) {
+                showToast('✅ Notification permission granted!');
+            } else {
+                showToast('❌ Notification permission denied!');
+            }
+            return notificationPermission;
+        }
+
+        // ======================================================
+        // Send Notification
+        // ======================================================
+        function sendNotification(title, body) {
+            if (!notificationPermission) {
+                console.log('No notification permission');
+                return;
+            }
+
+            try {
+                const options = {
+                    body: body,
+                    icon: 'icon.png',
+                    badge: 'icon.png',
+                    vibrate: [200, 100, 200],
+                    requireInteraction: true,
+                    tag: Date.now().toString(),
+                    actions: [
+                        { action: 'open', title: '📂 Open' }
+                    ]
+                };
+
+                const notification = new Notification(title, options);
+
+                notification.onclick = function() {
+                    window.focus();
+                    this.close();
+                };
+
+                playNotificationSound();
+
+            } catch (e) {
+                console.error('Notification error:', e);
+            }
+        }
+
+        // ======================================================
+        // Sound
+        // ======================================================
+        function playNotificationSound() {
+            try {
+                const audioContext = new(window.AudioContext || window.webkitAudioContext)();
+                const notes = [880, 1100, 1320];
+                notes.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        osc.frequency.value = freq;
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                        osc.start(audioContext.currentTime);
+                        osc.stop(audioContext.currentTime + 0.2);
+                    }, i * 150);
+                });
+            } catch (e) {
+                console.log('Sound error:', e);
+            }
+        }
+
+        // ======================================================
+        // Check Reminders
+        // ======================================================
+        function checkReminders() {
+            const now = new Date();
+            let anyNotified = false;
+
+            reminders.forEach(reminder => {
+                if (!reminder.notified && reminder.time <= now) {
+                    const timeStr = reminder.time.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    sendNotification(
+                        `⏰ ${reminder.title}`,
+                        `Time: ${timeStr} - It's time!`
+                    );
+                    reminder.notified = true;
+                    anyNotified = true;
+                    showToast(`🔔 Reminder "${reminder.title}" triggered!`);
+                }
+            });
+
+            if (anyNotified) {
+                saveData();
+                renderReminders();
+            }
+        }
+
+        // ======================================================
+        // Render Reminders
+        // ======================================================
+        function renderReminders() {
+            const list = document.getElementById('reminderList');
+            const sorted = [...reminders].sort((a, b) => a.time - b.time);
+
+            if (sorted.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-message">
+                        <p>📭 No active reminders</p>
+                        <p style="font-size:0.9rem;">Add a new reminder!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = sorted.map(reminder => {
+                const timeStr = reminder.time.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                const isPending = !reminder.notified && reminder.time > new Date();
+                const statusText = reminder.notified ? '✅ Done' :
+                    (reminder.time <= new Date() ? '⚠️ Past' : '⏳ Pending');
+
+                return `
+                    <div class="reminder-item">
+                        <div class="reminder-info">
+                            <div class="reminder-title">${escapeHtml(reminder.title)}</div>
+                            <div class="reminder-time">📅 ${timeStr}</div>
+                        </div>
+                        <span class="reminder-status ${isPending ? 'pending' : ''}">${statusText}</span>
+                        <button class="btn-delete" onclick="deleteReminder(${reminder.id})">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ======================================================
+        // Manage Reminders
+        // ======================================================
+        function addReminder() {
+            const titleInput = document.getElementById('reminderTitle');
+            const timeInput = document.getElementById('reminderTime');
+
+            const title = titleInput.value.trim();
+            const timeValue = timeInput.value;
+
+            if (!title) {
+                showToast('⚠️ Please enter a title!');
+                return;
+            }
+            if (!timeValue) {
+                showToast('⚠️ Please set a time!');
+                return;
+            }
+
+            const time = new Date(timeValue);
+            if (time <= new Date()) {
+                showToast('⚠️ Time must be in the future!');
+                return;
+            }
+
+            const newReminder = {
+                id: Date.now() + Math.random(),
+                title: title,
+                time: time,
+                notified: false
+            };
+
+            reminders.push(newReminder);
+            saveData();
+            renderReminders();
+            titleInput.value = '';
+            timeInput.value = '';
+
+            showToast(`✅ Reminder "${title}" added successfully!`);
+        }
+
+        function deleteReminder(id) {
+            if (!confirm('Are you sure you want to delete this reminder?')) return;
+            reminders = reminders.filter(r => r.id !== id);
+            saveData();
+            renderReminders();
+            showToast('🗑️ Reminder deleted!');
+        }
+
+        // ======================================================
+        // Service Worker
+        // ======================================================
+        async function registerServiceWorker() {
+            if (!('serviceWorker' in navigator)) {
+                console.log('Service Worker not supported');
+                return;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.register('sw.js', {
+                    scope: '/'
+                });
+                console.log('✅ Service Worker registered:', registration);
+
+                if (registration.pushManager) {
+                    console.log('✅ Push Manager supported');
+                }
+
+                showToast('✅ Service Worker activated!');
+
+            } catch (error) {
+                console.error('❌ Service Worker registration failed:', error);
+                showToast('⚠️ Service Worker registration failed!');
+            }
+        }
+
+        // ======================================================
+        // PWA Install
+        // ======================================================
+        let deferredPrompt = null;
+
+        function setupInstallButton() {
+            const installBtn = document.getElementById('installBtn');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.style.display = 'block';
+                console.log('📲 PWA install available');
+            });
+
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const result = await deferredPrompt.userChoice;
+                    if (result.outcome === 'accepted') {
+                        showToast('✅ App installed!');
+                        installBtn.style.display = 'none';
+                    } else {
+                        showToast('❌ Installation canceled');
+                    }
+                    deferredPrompt = null;
+                }
+            });
+
+            window.addEventListener('appinstalled', () => {
+                showToast('🎉 App installed successfully!');
+                installBtn.style.display = 'none';
+            });
+        }
+
+        // ======================================================
+        // Init
+        // ======================================================
+        async function init() {
+            loadData();
+            await requestNotificationPermission();
+            await registerServiceWorker();
+            setupInstallButton();
+
+            checkInterval = setInterval(checkReminders, 30000);
+            setTimeout(checkReminders, 1000);
+
+            document.getElementById('addReminderBtn').addEventListener('click', addReminder);
+            document.getElementById('reminderTitle').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addReminder();
+            });
+            document.getElementById('reminderTime').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addReminder();
+            });
+
+            showToast('⏰ Reminder app is ready!');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body>
+</html>
