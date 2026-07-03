@@ -18,18 +18,7 @@ You can install it on your phone like a native app!
 
 ---
 
-## 📁 Project Structure
-smart-reminder/
-├── fa.html # Persian version
-├── en.html # English version
-├── site.webmanifest # PWA manifest file
-├── sw.js # Service Worker
-├── favicon-*.png # Icons
-└── about.txt # Project info
 
-text
-
----
 
 ## 🛠️ Technologies
 
